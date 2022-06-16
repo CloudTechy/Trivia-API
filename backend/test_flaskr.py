@@ -18,6 +18,8 @@ class TriviaTestCase(unittest.TestCase):
         self.database_path = "postgresql://{}:{}@{}/{}".format(
             "postgres", 12345, "localhost:5432", self.database_name)
         setup_db(self.app, self.database_path)
+        self.new_question = {"question": "what is the name of the first astronaut",
+                             "answer": "Neil Gaiman", "difficulty": 5, "category": 5}
 
         # binds the app to the current context
         with self.app.app_context():
@@ -34,8 +36,88 @@ class TriviaTestCase(unittest.TestCase):
     TODO
     Write at least one test for each test for successful operation and for expected errors.
     """
+    def test_api_get_categories(self):
+        res = self.client().get('/categories')
+        data = json.loads(res.data)
+        self.assertTrue(data['categories'])
+        self.assertTrue(data['success'])
+        self.assertEqual(res.status_code, 200)
 
+    def test_api_get_paginated_questions(self):
+        res = self.client().get('/questions?page=1')
+        data = json.loads(res.data)
+        self.assertTrue(data['questions'])
+        self.assertTrue(data['total_questions'])
+        self.assertTrue(data['categories'])
+        self.assertTrue(data['current_category'])
+        self.assertTrue(data['success'])
+        self.assertEqual(res.status_code, 200)
 
+    def test_error_404_api_get_questions_of_invalid_page(self):
+        res = self.client().get('/questions?page=1000000000000')
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 404)
+        self.assertTrue(data['message'])
+        self.assertTrue(data['code'])
+        self.assertFalse(data['success'])
+    
+    def test_api_get_questions_by_category(self):
+        res = self.client().get('categories/1/questions?page=1')
+        data = json.loads(res.data)
+        self.assertTrue(data['questions'])
+        self.assertTrue(data['total_questions'])
+        self.assertTrue(data['current_category'])
+        self.assertTrue(data['success'])
+        self.assertEqual(res.status_code, 200)
+
+    def test_error_404_api_get_questions_by_category_of_invalid_page(self):
+        res = self.client().get('/categories/10000000000/questions')
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 404)
+        self.assertTrue(data['message'])
+        self.assertTrue(data['code'])
+        self.assertFalse(data['success'])
+    
+    def test_api_delete_question(self):
+        question = Question.query.order_by(Question.id.desc()).first()
+        res= self.client().delete(f"/questions/{question.id}")
+        self.assertEqual(res.status_code, 200)
+
+    def test_api_delete_question_error(self):
+        res= self.client().delete("/questions/10000000000000000")
+        self.assertEqual(res.status_code, 422)
+    
+    def test_api_create_question(self):
+        res = self.client().post('/questions', json=self.new_question)
+        data = json.loads(res.data)
+        self.assertTrue(data['id'])
+        self.assertTrue(data['questions'])
+        self.assertTrue(data['success'])
+        self.assertEqual(res.status_code, 200)
+
+    def test_405_if_create_question_method_not_allowed(self):
+        res = self.client().post("/books/1", json=self.new_question)
+        data = json.loads(res.data)
+        self.assertFalse(data['success'])
+        self.assertTrue(data['message'])
+        self.assertTrue(data['code'])
+        self.assertEqual(res.status_code, 405)
+
+    def test_api_search_question(self):
+        res = self.client().post('/questions', json={"searchTerm" : "19"})
+        data = json.loads(res.data)
+        self.assertTrue(data['questions'])
+        self.assertTrue(data['total_questions'])
+        self.assertTrue(data['current_category'])
+        self.assertTrue(data['success'])
+        self.assertEqual(res.status_code, 200)
+
+    def test_api_get_quiz_question(self):
+        res = self.client().post('/quizzes', json={"quiz_category": 1, "previous_questions":[]})
+        data = json.loads(res.data)
+        self.assertTrue(data['question'])
+        self.assertTrue(data['success'])
+        self.assertEqual(res.status_code, 200)
 # Make the tests conveniently executable
 if __name__ == "__main__":
     unittest.main()

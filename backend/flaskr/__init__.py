@@ -1,3 +1,4 @@
+from calendar import c
 import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -15,17 +16,32 @@ def create_app(test_config=None):
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
-
+    CORS(app, resources={r"/*": {'origins': '*'}})
     """
     @TODO: Use the after_request decorator to set Access-Control-Allow
     """
-
+    @app.after_request
+    def after_request(response):
+        response.headers.add(
+            "Access-Control-Allow-Headers", "Content-Type,Authorization,true"
+        )
+        response.headers.add(
+            "Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS"
+        )
+        return response
     """
     @TODO:
     Create an endpoint to handle GET requests
     for all available categories.
     """
-
+    @app.route('/categories')
+    def get_categories():
+        result = Category.query.all()
+        categories = [category.format() for category in result]
+        return jsonify({
+            'success' : True,
+            'categories' : categories
+        })
 
     """
     @TODO:
@@ -96,6 +112,61 @@ def create_app(test_config=None):
     Create error handlers for all expected errors
     including 404 and 422.
     """
+    @app.errorhandler(404)
+    def err_resource_not_found(err):
+        return jsonify(
+            {
+                "code": err.code,
+                "name": err.name,
+                'success': False,
+                'message': err.description
+            }
+        ), 404
 
+    @app.errorhandler(400)
+    def err_bad_request(err):
+        print(err)
+        return jsonify(
+            {
+                "code": err.code,
+                "name": err.name,
+                'success': False,
+                'message': err.description
+            }
+        ), 400
+
+    @app.errorhandler(422)
+    def err_unprocessable_request(err):
+        return jsonify(
+            {
+                "code": err.code,
+                "name": err.name,
+                'success': False,
+                'message': err.description
+            }
+        ), 422
+
+    @app.errorhandler(405)
+    def err_method_not_allowed(err):
+        print(err)
+        return jsonify(
+            {
+                "code": err.code,
+                "name": err.name,
+                'success': False,
+                'message': err.description
+            }
+        ), 405
+
+    @app.errorhandler(500)
+    def err_server_error(err):
+        return jsonify(
+            {
+                "code": err.code,
+                "name": err.name,
+                'success': False,
+                'message': err.description
+            }
+        ), 500
     return app
 
