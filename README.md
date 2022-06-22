@@ -328,3 +328,5 @@ Sample :  `curl -X POST -H "Content-Type:application/json"  -d '{"previous_quest
   "success": true
 }
 ```
+# License
+Click [here](/LICENSE.txt) to read the agreement

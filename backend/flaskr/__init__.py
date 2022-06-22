@@ -229,7 +229,7 @@ def create_app(test_config=None):
                 'question': question
             })
         except:
-            print(sys.exc_info())
+            abort(400)
     """
     @TODO:
     Create error handlers for all expected errors
