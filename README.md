@@ -37,9 +37,9 @@ If the setup is right, the app will be served locally on the default http://loca
 # Tests
 In order to run tests, navigate to the backend folder and run the following command.
 ```
-    dropdb bookshelf_test
-    createdb bookshelf_test
-    psql bookshelf_test < books.psql
+    dropdb trivia_test
+    createdb trivia_test
+    psql trivia_test < trivia.psql
     python test_flaskr.py
 ```
 Note: The first time you run the test, omit the dropdb command.
