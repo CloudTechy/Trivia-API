@@ -53,6 +53,13 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['success'])
         self.assertEqual(res.status_code, 200)
 
+    def test_api_create_question(self):
+        res = self.client().post('/questions', json=self.new_question)
+        data = json.loads(res.data)
+        self.assertTrue(data['question'])
+        self.assertTrue(data['success'])
+        self.assertEqual(res.status_code, 200)
+
     def test_error_404_api_get_questions_of_invalid_page(self):
         res = self.client().get('/questions?page=1000000000000')
         data = json.loads(res.data)
@@ -70,10 +77,10 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['success'])
         self.assertEqual(res.status_code, 200)
 
-    def test_error_404_api_get_questions_by_category_of_invalid_page(self):
+    def test_error_400_api_get_questions_by_invalid_category(self):
         res = self.client().get('/categories/10000000000/questions')
         data = json.loads(res.data)
-        self.assertEqual(res.status_code, 404)
+        self.assertEqual(res.status_code, 400)
         self.assertTrue(data['message'])
         self.assertTrue(data['code'])
         self.assertFalse(data['success'])
@@ -86,17 +93,9 @@ class TriviaTestCase(unittest.TestCase):
     def test_api_delete_question_error(self):
         res= self.client().delete("/questions/10000000000000000")
         self.assertEqual(res.status_code, 422)
-    
-    def test_api_create_question(self):
-        res = self.client().post('/questions', json=self.new_question)
-        data = json.loads(res.data)
-        self.assertTrue(data['id'])
-        self.assertTrue(data['questions'])
-        self.assertTrue(data['success'])
-        self.assertEqual(res.status_code, 200)
 
     def test_405_if_create_question_method_not_allowed(self):
-        res = self.client().post("/books/1", json=self.new_question)
+        res = self.client().post("/questions/1", json=self.new_question)
         data = json.loads(res.data)
         self.assertFalse(data['success'])
         self.assertTrue(data['message'])
@@ -113,11 +112,11 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
 
     def test_api_get_quiz_question(self):
-        res = self.client().post('/quizzes', json={"quiz_category": 1, "previous_questions":[]})
+        res = self.client().post('/quizzes', json={"previous_questions": [20],"quiz_category": {"type": "Science","id": "1"}})
         data = json.loads(res.data)
-        self.assertTrue(data['question'])
         self.assertTrue(data['success'])
         self.assertEqual(res.status_code, 200)
+
 # Make the tests conveniently executable
 if __name__ == "__main__":
     unittest.main()

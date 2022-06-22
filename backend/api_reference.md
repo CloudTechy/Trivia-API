@@ -30,24 +30,257 @@ The API error codes follows the available HTTP standard status codes, the status
 - `400`: The code is sent when the there is an error with the request.
 Note: A `200` status code will be sent when there is no error
 ### Endpoint Library
-##### GET '/api/v1.0/categories'
+##### GET '/categories'
 General
 - Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
 - Request Arguments: None
-- Returns: An object with a single key, categories, that contains an object of id: category_string key: value pairs.
+- Returns: An object with two keys, categories, that contains an object of id: category_string key: value pairs and success, with its value as true
 
-Sample :  `curl -X GET http://127.0.0.1:5000/api/v1.0/categories`
+Sample :  `curl -X GET http://127.0.0.1:5000/categories`
 ```
+  {
+  "categories": {
+    "1": "Science",       
+    "2": "Art",
+    "3": "Geography",     
+    "4": "History",       
+    "5": "Entertainment", 
+    "6": "Sports"
+  },
+  "success": true
+}
+```
+
+##### GET '/questions'
+General
+- Fetches paginated questions which are limited to only 10 questions per page by default.
+- Request Arguments: None
+- Returns: An object containing multiple keys such as: catgories, current_category, questions, success  and total_questions. the questions keys contains a list of object which represent the question, while the total_questions gives you the total number of questions which can help you in pagination.
+
+Sample :  `curl -X GET http://127.0.0.1:5000/questions`
+```
+   {
+  "categories": {
+    "1": "Science",       
+    "2": "Art", 
+    "3": "Geography",     
+    "4": "History",       
+    "5": "Entertainment", 
+    "6": "Sports"
+  },
+  "current_category": "Science",
+  "questions": [
     {
-      "1": "Science",
-      "2": "Art",
-      "3": "Geography",
-      "4": "History",
-      "5": "Entertainment",
-      "6": "Sports"
+      "answer": "Maya Angelou",
+      "category": 4,
+      "difficulty": 2,
+      "id": 5,
+      "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+    },
+    {
+      "answer": "Muhammad Ali",
+      "category": 4,
+      "difficulty": 1,
+      "id": 9,
+      "question": "What boxer's original name is Cassius Clay?"
+    },
+    {
+      "answer": "Apollo 13",
+      "category": 5,
+      "difficulty": 4,
+      "id": 2,
+      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+    },
+    {
+      "answer": "Tom Cruise",
+      "category": 5,
+      "difficulty": 4,
+      "id": 4,
+      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+    },
+    {
+      "answer": "Edward Scissorhands",
+      "category": 5,
+      "difficulty": 3,
+      "id": 6,
+      "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
+    },
+    {
+      "answer": "Brazil",
+      "category": 6,
+      "difficulty": 3,
+      "id": 10,
+      "question": "Which is the only team to play in every soccer World Cup tournament?"
+    },
+    {
+      "answer": "Uruguay",
+      "category": 6,
+      "difficulty": 4,
+      "id": 11,
+      "question": "Which country won the first ever soccer World Cup in 1930?"
+    },
+    {
+      "answer": "George Washington Carver",
+      "category": 4,
+      "difficulty": 2,
+      "id": 12,
+      "question": "Who invented Peanut Butter?"
+    },
+    {
+      "answer": "Lake Victoria",
+      "category": 3,
+      "difficulty": 2,
+      "id": 13,
+      "question": "What is the largest lake in Africa?"
+    },
+    {
+      "answer": "The Palace of Versailles",
+      "category": 3,
+      "difficulty": 3,
+      "id": 14,
+      "question": "In which royal palace would you find the Hall of Mirrors?"
     }
+  ],
+  "success": true,
+  "total_questions": 20
+}
 ```
+##### POST '/questions'
+General
+- This enables you to create your own questions.
+- Request Arguments: the question and answer text, category, and difficulty score.
+- Returns: An object with two keys, question, that contains an object of the created question and success, with its value as true
 
+Sample :  `curl -X POST -H "Content-Type:application/json"  -d '{"question":"What is the rarest M&M color?","answer":"Brown","category":5,"difficulty":5}' http://127.0.0.1:5000/questions`
+```
+{
+  "question": {
+    "answer": "Brown",
+    "category": 5,
+    "difficulty": 5,
+    "id": 25,
+    "question": "What is the rarest M&M color?"
+  },
+  "success": true
+}
+```
+##### GET '/categories/{id}/questions'
+General
+- Fetches a list of paginated questions under a specific category
+- Request Arguments: category id passed through the url
+- Returns: An object containing multiple keys such as: catgories, current_category, questions, success  and total_questions. the questions keys contains a list of object which represent the question, while the total_questions gives you the total number of questions which can help you in pagination.
 
+Sample :  ` curl -X GET http://127.0.0.1:5000/categories/1/questions`
+```
+{
+  "current_category": "Science",
+  "questions": [
+    {
+      "answer": "The Liver",
+      "category": 1,
+      "difficulty": 4,
+      "id": 20,
+      "question": "What is the heaviest organ in the human body?"
+    },
+    {
+      "answer": "Alexander Fleming",
+      "category": 1,
+      "difficulty": 3,
+      "id": 21,
+      "question": "Who discovered penicillin?"
+    },
+    {
+      "answer": "Blood",
+      "category": 1,
+      "difficulty": 4,
+      "id": 22,
+      "question": "Hematology is a branch of medicine involving the study of what?"
+    },
+    {
+      "answer": "Ebuka",
+      "category": 1,
+      "difficulty": 5,
+      "id": 24,
+      "question": "who created you"
+    },
+    {
+      "answer": "a boy",
+      "category": 1,
+      "difficulty": 1,
+      "id": 25,
+      "question": "who is obi"
+    }
+  ],
+  "success": true,
+  "total_questions": 6
+}
+```
+##### POST '/questions' (Search)
+General
+- Allows you to perform a swift search operation for questions containing the giving keyword.
+- Request Arguments: searchTerm string.
+- Returns: An object containing multiple keys such as: catgories, current_category, questions, success  and total_questions. the questions keys contains a list of object which represent the question, while the total_questions gives you the total number of questions which can help you in pagination.
 
+Sample :  `curl -X POST -H "Content-Type:application/json"  -d '{"searchTerm":"19"}' http://127.0.0.1:5000/questions`
+```
+{
+  "current_category": "Science",
+  "questions": [
+    {
+      "answer": "Apollo 13",
+      "category": 5,
+      "difficulty": 4,
+      "id": 2,
+      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+    },
+    {
+      "answer": "Edward Scissorhands",
+      "category": 5,
+      "difficulty": 3,
+      "id": 6,
+      "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
+    },
+    {
+      "answer": "Uruguay",
+      "category": 6,
+      "difficulty": 4,
+      "id": 11,
+      "question": "Which country won the first ever soccer World Cup in 1930?"
+    }
+  ],
+  "success": true,
+  "total_questions": 3
+}
+```
+##### DELETE '/questions/{id}'
+General
+- removes a specific question.
+- Request Arguments: Question ID passsed through the url
+- Returns: An object containing the id of the deleted question and success key with a true value
 
+Sample :  `curl -X DELETE http://127.0.0.1:5000/questions/25`
+```
+{
+  "id": 25,
+  "success": true
+}
+```
+##### POST '/quizzes'
+General
+- This allows users play trivia game, by answering random questions from a category if specified and the user score will be shown to the player at the end of the game.
+- Request Arguments: category and previous question parameters
+- Returns: An object with question key containing a random question within the given category and a success key with a true value.
+
+Sample :  `curl -X POST -H "Content-Type:application/json"  -d '{"previous_questions": [20],"quiz_category": {"type": "Science","id": "1"}}' http://127.0.0.1:5000/quizzes`
+```
+{
+  "question": {
+    "answer": "Alexander Fleming",
+    "category": 1,
+    "difficulty": 3,
+    "id": 21,
+    "question": "Who discovered penicillin?"
+  },
+  "success": true
+}
+```
