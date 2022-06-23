@@ -100,8 +100,6 @@ def create_app(test_config=None):
         try:
             question = Question.query.filter(
                 Question.id == question_id).one_or_none()
-            if question is None:
-                abort(404)
             question.delete()
             return jsonify(
                 {
@@ -110,7 +108,7 @@ def create_app(test_config=None):
                 }
             )
         except:
-            abort(422)
+            abort(400)
     """
     @TODO:
     Create an endpoint to POST a new question,

@@ -26,6 +26,11 @@ class TriviaTestCase(unittest.TestCase):
             "difficulty": 5,
             "category": 5
         }
+        self.bad_new_question = {
+            "question": "what is the name of the first astronaut",
+            "difficulty": 5,
+            "category": 5
+        }
 
         # binds the app to the current context
         with self.app.app_context():
@@ -61,13 +66,6 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['success'])
         self.assertEqual(res.status_code, 200)
 
-    def test_api_create_question(self):
-        res = self.client().post('/questions', json=self.new_question)
-        data = json.loads(res.data)
-        self.assertTrue(data['question'])
-        self.assertTrue(data['success'])
-        self.assertEqual(res.status_code, 200)
-
     def test_error_404_api_get_questions_of_invalid_page(self):
         res = self.client().get('/questions?page=1000000000000')
         data = json.loads(res.data)
@@ -75,6 +73,21 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['message'])
         self.assertTrue(data['code'])
         self.assertFalse(data['success'])
+
+    def test_api_create_question(self):
+        res = self.client().post('/questions', json=self.new_question)
+        data = json.loads(res.data)
+        self.assertTrue(data['question'])
+        self.assertTrue(data['success'])
+        self.assertEqual(res.status_code, 200)
+
+    def test_400_if_create_question_request_is_invalid(self):
+        res = self.client().post("/questions", json=self.bad_new_question)
+        data = json.loads(res.data)
+        self.assertFalse(data['success'])
+        self.assertTrue(data['message'])
+        self.assertTrue(data['code'])
+        self.assertEqual(res.status_code, 400)
 
     def test_api_get_questions_by_category(self):
         res = self.client().get('categories/1/questions?page=1')
@@ -98,17 +111,9 @@ class TriviaTestCase(unittest.TestCase):
         res = self.client().delete(f"/questions/{question.id}")
         self.assertEqual(res.status_code, 200)
 
-    def test_api_delete_question_error(self):
+    def test_400_api_delete_question_error(self):
         res = self.client().delete("/questions/10000000000000000")
-        self.assertEqual(res.status_code, 422)
-
-    def test_405_if_create_question_method_not_allowed(self):
-        res = self.client().post("/questions/1", json=self.new_question)
-        data = json.loads(res.data)
-        self.assertFalse(data['success'])
-        self.assertTrue(data['message'])
-        self.assertTrue(data['code'])
-        self.assertEqual(res.status_code, 405)
+        self.assertEqual(res.status_code, 400)
 
     def test_api_search_question(self):
         res = self.client().post('/questions', json={"searchTerm": "19"})
@@ -118,6 +123,14 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['current_category'])
         self.assertTrue(data['success'])
         self.assertEqual(res.status_code, 200)
+    
+    def test_404_retrieve_invalid_search_term(self):
+        res = self.client().post("/questions/", json={"searchTerm": "zzzzzzzzzzzz"})
+        data = json.loads(res.data)
+        self.assertFalse(data['success'])
+        self.assertTrue(data['message'])
+        self.assertTrue(data['code'])
+        self.assertEqual(res.status_code, 404)
 
     def test_api_get_quiz_question(self):
         res = self.client().post('/quizzes', json={
@@ -130,7 +143,15 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['success'])
         self.assertEqual(res.status_code, 200)
 
-
+    def test_400_if_get_quiz_question_is_invalid(self):
+        res = self.client().post("/questions", json={
+            "previous_questions": [20]
+            })
+        data = json.loads(res.data)
+        self.assertFalse(data['success'])
+        self.assertTrue(data['message'])
+        self.assertTrue(data['code'])
+        self.assertEqual(res.status_code, 400)
 # Make the tests conveniently executable
 if __name__ == "__main__":
     unittest.main()
