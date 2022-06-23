@@ -123,9 +123,10 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['current_category'])
         self.assertTrue(data['success'])
         self.assertEqual(res.status_code, 200)
-    
+
     def test_404_retrieve_invalid_search_term(self):
-        res = self.client().post("/questions/", json={"searchTerm": "zzzzzzzzzzzz"})
+        res = self.client().post("/questions/", json={
+            "searchTerm": "zzzzzzzzzzzz"})
         data = json.loads(res.data)
         self.assertFalse(data['success'])
         self.assertTrue(data['message'])
@@ -146,12 +147,14 @@ class TriviaTestCase(unittest.TestCase):
     def test_400_if_get_quiz_question_is_invalid(self):
         res = self.client().post("/questions", json={
             "previous_questions": [20]
-            })
+        })
         data = json.loads(res.data)
         self.assertFalse(data['success'])
         self.assertTrue(data['message'])
         self.assertTrue(data['code'])
         self.assertEqual(res.status_code, 400)
+
+
 # Make the tests conveniently executable
 if __name__ == "__main__":
     unittest.main()
