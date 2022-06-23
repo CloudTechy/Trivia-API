@@ -16,10 +16,16 @@ class TriviaTestCase(unittest.TestCase):
         self.client = self.app.test_client
         self.database_name = config['test_database_name']
         self.database_path = "postgresql://{}:{}@{}/{}".format(
-            config['database_username'], config['database_password'], "localhost:5432", self.database_name)
+            config['database_username'],
+            config['database_password'],
+            "localhost:5432", self.database_name)
         setup_db(self.app, self.database_path)
-        self.new_question = {"question": "what is the name of the first astronaut",
-                             "answer": "Neil Gaiman", "difficulty": 5, "category": 5}
+        self.new_question = {
+            "question": "what is the name of the first astronaut",
+            "answer": "Neil Gaiman",
+            "difficulty": 5,
+            "category": 5
+        }
 
         # binds the app to the current context
         with self.app.app_context():
@@ -27,15 +33,17 @@ class TriviaTestCase(unittest.TestCase):
             self.db.init_app(self.app)
             # create all tables
             self.db.create_all()
-    
+
     def tearDown(self):
         """Executed after reach test"""
         pass
 
     """
     TODO
-    Write at least one test for each test for successful operation and for expected errors.
+    Write at least one test for each test for successful operation and
+    for expected errors.
     """
+
     def test_api_get_categories(self):
         res = self.client().get('/categories')
         data = json.loads(res.data)
@@ -67,7 +75,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['message'])
         self.assertTrue(data['code'])
         self.assertFalse(data['success'])
-    
+
     def test_api_get_questions_by_category(self):
         res = self.client().get('categories/1/questions?page=1')
         data = json.loads(res.data)
@@ -84,14 +92,14 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['message'])
         self.assertTrue(data['code'])
         self.assertFalse(data['success'])
-    
+
     def test_api_delete_question(self):
         question = Question.query.order_by(Question.id.desc()).first()
-        res= self.client().delete(f"/questions/{question.id}")
+        res = self.client().delete(f"/questions/{question.id}")
         self.assertEqual(res.status_code, 200)
 
     def test_api_delete_question_error(self):
-        res= self.client().delete("/questions/10000000000000000")
+        res = self.client().delete("/questions/10000000000000000")
         self.assertEqual(res.status_code, 422)
 
     def test_405_if_create_question_method_not_allowed(self):
@@ -103,7 +111,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 405)
 
     def test_api_search_question(self):
-        res = self.client().post('/questions', json={"searchTerm" : "19"})
+        res = self.client().post('/questions', json={"searchTerm": "19"})
         data = json.loads(res.data)
         self.assertTrue(data['questions'])
         self.assertTrue(data['total_questions'])
@@ -112,10 +120,16 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
 
     def test_api_get_quiz_question(self):
-        res = self.client().post('/quizzes', json={"previous_questions": [20],"quiz_category": {"type": "Science","id": "1"}})
+        res = self.client().post('/quizzes', json={
+            "previous_questions": [20],
+            "quiz_category": {
+                "type": "Science",
+                "id": "1"
+            }})
         data = json.loads(res.data)
         self.assertTrue(data['success'])
         self.assertEqual(res.status_code, 200)
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

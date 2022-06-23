@@ -12,11 +12,12 @@ from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
     setup_db(app)
-    
+
     def paginate_questions(request, selections):
         page = request.args.get('page', 1, type=int)
         start = (page - 1) * QUESTIONS_PER_PAGE
@@ -24,7 +25,8 @@ def create_app(test_config=None):
         questions = [question.format() for question in selections]
         return questions[start:end]
     """
-    @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
+    @TODO: Set up CORS. Allow '*' for origins.
+    Delete the sample route after completing the TODOs
     """
     CORS(app, resources={r"/*": {'origins': '*'}})
     """
@@ -48,13 +50,13 @@ def create_app(test_config=None):
     def get_categories():
         result = Category.query.all()
         categories = {
-            category.format()['id']: category.format()['type'] for category in result}
+            category.format()['id']: category.format()['type']
+            for category in result}
         return jsonify({
-            'success' : True,
-            'categories' : categories
+            'success': True,
+            'categories': categories
         })
 
-   
     """
     @TODO:
     Create an endpoint to handle GET requests for questions,
@@ -64,7 +66,8 @@ def create_app(test_config=None):
 
     TEST: At this point, when you start the application
     you should see questions and categories generated,
-    ten questions per page and pagination at the bottom of the screen for three pages.
+    ten questions per page and
+    pagination at the bottom of the screen for three pages.
     Clicking on the page numbers should update the questions.
     """
     @app.route('/questions')
@@ -75,25 +78,28 @@ def create_app(test_config=None):
             abort(404)
         result2 = Category.query.all()
         categories = {
-            category.format()['id']: category.format()['type'] for category in result2}
+            category.format()['id']: category.format()['type']
+            for category in result2}
         return jsonify({
             'success': True,
             'questions': questions,
             'total_questions':  len(result),
             'current_category': categories[1],
             'categories': categories
-            })
+        })
     """
     @TODO:
     Create an endpoint to DELETE question using a question ID.
 
-    TEST: When you click the trash icon next to a question, the question will be removed.
+    TEST: When you click the trash icon next to a question,
+    the question will be removed.
     This removal will persist in the database and when you refresh the page.
     """
     @app.route('/questions/<int:question_id>', methods=['DELETE'])
     def delete_question(question_id):
         try:
-            question = Question.query.filter(Question.id == question_id).one_or_none()
+            question = Question.query.filter(
+                Question.id == question_id).one_or_none()
             if question is None:
                 abort(404)
             question.delete()
@@ -112,21 +118,22 @@ def create_app(test_config=None):
     category, and difficulty score.
 
     TEST: When you submit a question on the "Add" tab,
-    the form will clear and the question will appear at the end of the last page
+    the form will clear and
+    the question will appear at the end of the last page
     of the questions list in the "List" tab.
     """
-    @app.route('/questions', methods = ['POST'])
+    @app.route('/questions', methods=['POST'])
     def create_question():
         try:
             requestJson = request.get_json()
             if 'searchTerm' in requestJson:
-                #this is a search question request implementation
+                # this is a search question request implementation
                 searchTerm = requestJson['searchTerm']
                 result = Question.query.filter(
                     Question.question.ilike(f'%{searchTerm}%')).all()
                 questions = paginate_questions(request, result)
                 if len(questions) == 0:
-                        abort(404)
+                    abort(404)
                 else:
                     result2 = Category.query.all()
                     return jsonify({
@@ -139,8 +146,8 @@ def create_app(test_config=None):
                 question = Question(**requestJson)
                 question.insert()
                 return jsonify({
-                    "success" : True,
-                    "question" :  question.format()
+                    "success": True,
+                    "question":  question.format()
                 })
         except:
             abort(400)
@@ -155,7 +162,7 @@ def create_app(test_config=None):
     Try using the word "title" to start.
     """
 
-    #implemented on @app.route('/questions', methods=['POST'])
+    # implemented on @app.route('/questions', methods=['POST'])
     """
     @TODO:
     Create a GET endpoint to get questions based on category.
@@ -190,7 +197,7 @@ def create_app(test_config=None):
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
     """
-    @app.route('/quizzes', methods =['POST'])
+    @app.route('/quizzes', methods=['POST'])
     def get_quiz_question():
         try:
             question = None
@@ -204,28 +211,31 @@ def create_app(test_config=None):
             else:
                 isQuizByCategory = False
             questionsCount = Question.query.count()
-            randomNumbers = []
-            while (question is None) and (questionsCountByCategory != len(previous_questions)): 
+            randNums = []
+            while (question is None) and (questionsCountByCategory !=
+                                          len(previous_questions)):
                 startCount = Question.query.first().id
-                randomNumber = random.randint(Question.query.first().id, questionsCount + startCount)
-                if randomNumber in randomNumbers or randomNumber in previous_questions:
+                randNum = random.randint(
+                    Question.query.first().id, questionsCount + startCount)
+                if randNum in randNums or randNum in previous_questions:
                     continue
-                else : 
+                else:
                     if isQuizByCategory:
                         result = Question.query.filter(
-                            Question.category == quiz_category['id'], Question.id == randomNumber).one_or_none()
-                        if result == None:
-                            randomNumbers.append(randomNumber)
+                            Question.category == quiz_category['id'],
+                            Question.id == randNum).one_or_none()
+                        if result is None:
+                            randNums.append(randNum)
                         else:
                             question = result.format()
                     else:
-                        result = Question.query.get(randomNumber)
-                        if result == None:
-                            randomNumbers.append(randomNumber)
+                        result = Question.query.get(randNum)
+                        if result is None:
+                            randNums.append(randNum)
                         else:
                             question = result.format()
             return jsonify({
-                'success' : True,
+                'success': True,
                 'question': question
             })
         except:
@@ -290,4 +300,3 @@ def create_app(test_config=None):
             }
         ), 500
     return app
-

@@ -8,7 +8,9 @@ from dotenv import dotenv_values
 config = dotenv_values(".env")
 database_name = config['database_name']
 database_path = "postgresql://{}:{}@{}/{}".format(
-    config['database_username'], config['database_password'], "localhost:5432", database_name)
+    config['database_username'],
+    config['database_password'],
+    "localhost:5432", database_name)
 
 db = SQLAlchemy()
 
@@ -16,18 +18,22 @@ db = SQLAlchemy()
 setup_db(app)
     binds a flask application and a SQLAlchemy service
 """
+
+
 def setup_db(app, database_path=database_path):
     app.config["SQLALCHEMY_DATABASE_URI"] = database_path
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
     db.init_app(app)
-    migrate = Migrate(app=app,db= db)
-    # db.create_all()
+    migrate = Migrate(app=app, db=db)
+
 
 """
 Question
 
 """
+
+
 class Question(db.Model):
     __tablename__ = 'questions'
 
@@ -44,7 +50,8 @@ class Question(db.Model):
         self.difficulty = difficulty
 
     def __repr__(self):
-        return f'Question ID: {self.id}, question: {self.question}, answer: {self.answer}, difficulty: {self.difficulty}'
+        return 'Question ID:{}, question:{}, answer:{}, difficulty:{}'.format(
+            self.id, self.question, self.answer, self.difficulty)
 
     def insert(self):
         db.session.add(self)
@@ -64,18 +71,22 @@ class Question(db.Model):
             'answer': self.answer,
             'category': self.category,
             'difficulty': self.difficulty
-            }
+        }
+
 
 """
 Category
 
 """
+
+
 class Category(db.Model):
     __tablename__ = 'categories'
 
     id = Column(Integer, primary_key=True)
     type = Column(String)
-    questions = db.relationship('Question', backref='parentCategory', lazy=True)
+    questions = db.relationship(
+        'Question', backref='parentCategory', lazy=True)
 
     def __init__(self, type):
         self.type = type
@@ -87,4 +98,4 @@ class Category(db.Model):
         return {
             'id': self.id,
             'type': self.type
-            }
+        }
