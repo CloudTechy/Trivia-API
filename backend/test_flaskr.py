@@ -4,7 +4,7 @@ import json
 from flask_sqlalchemy import SQLAlchemy
 
 from flaskr import create_app
-from models import setup_db, Question, Category
+from models import setup_db, Question, Category, config
 
 
 class TriviaTestCase(unittest.TestCase):
@@ -14,9 +14,9 @@ class TriviaTestCase(unittest.TestCase):
         """Define test variables and initialize app."""
         self.app = create_app()
         self.client = self.app.test_client
-        self.database_name = "trivia_test"
+        self.database_name = config['test_database_name']
         self.database_path = "postgresql://{}:{}@{}/{}".format(
-            "postgres", 12345, "localhost:5432", self.database_name)
+            config['database_username'], config['database_password'], "localhost:5432", self.database_name)
         setup_db(self.app, self.database_path)
         self.new_question = {"question": "what is the name of the first astronaut",
                              "answer": "Neil Gaiman", "difficulty": 5, "category": 5}
